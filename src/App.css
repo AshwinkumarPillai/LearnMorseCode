@@ -1,0 +1,22 @@
+html {
+  font-size: 10px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  padding-top: 50px;
+}
+
+.greenBtn {
+  background: #44bd32 !important;
+  color: white !important;
+  border-color: black !important;
+}
+
+.redBtn {
+  background: #e84118 !important;
+  color: white !important;
+  border-color: black !important;
+}

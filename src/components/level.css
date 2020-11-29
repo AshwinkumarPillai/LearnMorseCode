@@ -1,0 +1,16 @@
+.info_area,
+.info_area * {
+  font-size: 20px !important;
+}
+
+.info_area {
+  min-height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.level_start {
+  padding: 10px 30px;
+  color: #fff;
+}
