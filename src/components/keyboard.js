@@ -88,7 +88,7 @@ class keyboard extends Component {
   };
 
   playQuestion = () => {
-    console.log(this.questionare, this.currentCount, this.totalCount);
+    // console.log(this.questionare, this.currentCount, this.totalCount);
     let min = 0;
     let max = this.questionare.length - 1;
     this.currIndex = Math.floor(Math.random() * (max - min + 1)) + min;
