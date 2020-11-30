@@ -14,6 +14,7 @@ class keyboard extends Component {
   currLevel = 1;
   totalLevels = 20;
   url = backend_url;
+  isLevel = false;
 
   constructor(props) {
     super(props);
@@ -87,6 +88,7 @@ class keyboard extends Component {
   };
 
   playQuestion = () => {
+    console.log(this.questionare, this.currentCount, this.totalCount);
     let min = 0;
     let max = this.questionare.length - 1;
     this.currIndex = Math.floor(Math.random() * (max - min + 1)) + min;
@@ -99,7 +101,15 @@ class keyboard extends Component {
   finishLevel = async () => {
     let user = await JSON.parse(localStorage.getItem("user"));
     if (!user) this.props.history.push("/");
-    if (this.currLevel < user.level || this.currLevel === this.totalLevels) this.props.history.push("/tutorials");
+    let complete = document.getElementById("complete");
+    if (this.currLevel < user.level || this.currLevel === this.totalLevels) {
+      complete.style.display = "flex";
+      setTimeout(() => {
+        complete.style.display = "none";
+        this.props.history.push("/tutorials");
+      }, 1700);
+      return;
+    }
     let data = { email: user.email, level: user.level + 1 };
 
     let val = await fetch(this.url + "setLevel", {
@@ -116,8 +126,57 @@ class keyboard extends Component {
     if (content.status === 200) {
       user.level = content.details.level;
       await localStorage.setItem("user", JSON.stringify(user));
-      alert("Hurray! You completed this level!");
-      this.props.history.push("/tutorials");
+      complete.style.display = "flex";
+      setTimeout(() => {
+        complete.style.display = "none";
+        this.props.history.push("/tutorials");
+      }, 1700);
+    }
+  };
+
+  clickAnsQuestion = (e) => {
+    if (!this.isLevel) return;
+    let keyCode = parseInt(e.currentTarget.getAttribute("data-key"));
+    const key = document.querySelector(`.key[data-key="${keyCode}"]`);
+    const audio = document.querySelector(`audio[data-key="${keyCode}"]`);
+    if (!key || !audio) return;
+    if (this.questionOn) {
+      this.questionOn = 0;
+      key.classList.add("pressed");
+      if (keyCode === this.currentKeyCode) {
+        key.classList.add("greenBtn");
+        this.currentCount++;
+        if (++this.questionare[this.currIndex].count === 5) {
+          this.questionare[this.currIndex].audio.remove();
+          key.style.opacity = ".3";
+          this.questionare.splice(this.currIndex, 1);
+        }
+      } else {
+        key.classList.add("redBtn");
+        this.questionare[this.currIndex].count = Math.max(0, this.questionare[this.currIndex].count - 1);
+        this.questionare.forEach((obj) => {
+          if (obj.keyCode === keyCode) obj.count = Math.max(0, obj.count - 1);
+        });
+        this.currentCount = Math.max(0, this.currentCount - 2);
+      }
+      let progress = (this.currentCount / this.totalCount) * 100;
+
+      this.props.setProgress(progress);
+
+      setTimeout(() => {
+        key.classList.remove("pressed");
+        key.classList.remove("greenBtn");
+        key.classList.remove("redBtn");
+      }, 400);
+
+      if (this.currentCount === this.totalCount) {
+        this.finishLevel();
+        return;
+      }
+
+      setTimeout(() => {
+        this.playQuestion();
+      }, 1000);
     }
   };
 
@@ -177,9 +236,15 @@ class keyboard extends Component {
 
     //  ---- for level component
     if (this.props.letters) {
+      this.isLevel = true;
       this.currLevel = this.props.level;
       this.totalLevels = this.props.totalLevels;
-      document.querySelector(".level_start").addEventListener("click", this.startLevel);
+      let levelStart = document.querySelector(".level_start");
+      if (!levelStart) {
+        this.props.history.push("/tutorials");
+        return;
+      }
+      levelStart.addEventListener("click", this.startLevel);
       let letters = this.props.letters;
       this.setState({ letters: JSON.parse(JSON.stringify(letters)), level: this.props.level });
       document.querySelectorAll(".key").forEach((ele) => {
@@ -202,6 +267,10 @@ class keyboard extends Component {
       for (let letterArr of non_letters) {
         const audio1 = document.querySelector(`audio[data-key="${letterArr[0].keyCode}"]`);
         const audio2 = document.querySelector(`audio[data-key="${letterArr[1].keyCode}"]`);
+        if (!audio1) {
+          this.props.history.push("/tutorials");
+          return;
+        }
         audio1.remove();
         audio2.remove();
       }
@@ -217,161 +286,166 @@ class keyboard extends Component {
 
   render() {
     return (
-      <div className="keys__container">
-        <div className="keys keys_number">
-          <div className="key" data-key="49">
-            <kbd>1</kbd>
-            <span className="morse_code">. _ _ _ _</span>
-          </div>
-          <div className="key" data-key="50">
-            <kbd>2</kbd>
-            <span className="morse_code">. . _ _ _</span>
-          </div>
-          <div className="key" data-key="51">
-            <kbd>3</kbd>
-            <span className="morse_code">. . . _ _</span>
-          </div>
-          <div className="key" data-key="52">
-            <kbd>4</kbd>
-            <span className="morse_code">. . . . _</span>
-          </div>
-          <div className="key" data-key="53">
-            <kbd>5</kbd>
-            <span className="morse_code">. . . . .</span>
-          </div>
-          <div className="key" data-key="54">
-            <kbd>6</kbd>
-            <span className="morse_code">_ . . . .</span>
-          </div>
-          <div className="key" data-key="55">
-            <kbd>7</kbd>
-            <span className="morse_code">_ _ . . .</span>
-          </div>
-          <div className="key" data-key="56">
-            <kbd>8</kbd>
-            <span className="morse_code">_ _ _ . .</span>
-          </div>
-          <div className="key" data-key="57">
-            <kbd>9</kbd>
-            <span className="morse_code">_ _ _ _ .</span>
-          </div>
-          <div className="key" data-key="48">
-            <kbd>0</kbd>
-            <span className="morse_code">_ _ _ _ _</span>
-          </div>
+      <React.Fragment>
+        <div className="complete" id="complete">
+          Hurray! Level Complete
         </div>
-        <div className="keys keys_top">
-          <div className="key" data-key="81">
-            <kbd>Q</kbd>
-            <span className="morse_code">_ _ . _</span>
+        <div className="keys__container">
+          <div className="keys keys_number">
+            <div className="key" onClick={this.clickAnsQuestion} data-key="49">
+              <kbd>1</kbd>
+              <span className="morse_code">. _ _ _ _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="50">
+              <kbd>2</kbd>
+              <span className="morse_code">. . _ _ _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="51">
+              <kbd>3</kbd>
+              <span className="morse_code">. . . _ _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="52">
+              <kbd>4</kbd>
+              <span className="morse_code">. . . . _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="53">
+              <kbd>5</kbd>
+              <span className="morse_code">. . . . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="54">
+              <kbd>6</kbd>
+              <span className="morse_code">_ . . . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="55">
+              <kbd>7</kbd>
+              <span className="morse_code">_ _ . . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="56">
+              <kbd>8</kbd>
+              <span className="morse_code">_ _ _ . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="57">
+              <kbd>9</kbd>
+              <span className="morse_code">_ _ _ _ .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="48">
+              <kbd>0</kbd>
+              <span className="morse_code">_ _ _ _ _</span>
+            </div>
           </div>
-          <div className="key" data-key="87">
-            <kbd>W</kbd>
-            <span className="morse_code">. _ _</span>
+          <div className="keys keys_top">
+            <div className="key" onClick={this.clickAnsQuestion} data-key="81">
+              <kbd>Q</kbd>
+              <span className="morse_code">_ _ . _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="87">
+              <kbd>W</kbd>
+              <span className="morse_code">. _ _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="69">
+              <kbd>E</kbd>
+              <span className="morse_code">.</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="82">
+              <kbd>R</kbd>
+              <span className="morse_code">. _ .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="84">
+              <kbd>T</kbd>
+              <span className="morse_code">_</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="89">
+              <kbd>Y</kbd>
+              <span className="morse_code">_ . _ _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="85">
+              <kbd>U</kbd>
+              <span className="morse_code">. . _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="73">
+              <kbd>I</kbd>
+              <span className="morse_code">. .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="79">
+              <kbd>O</kbd>
+              <span className="morse_code">_ _ _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="80">
+              <kbd>P</kbd>
+              <span className="morse_code">. _ _ .</span>
+            </div>
           </div>
-          <div className="key" data-key="69">
-            <kbd>E</kbd>
-            <span className="morse_code">.</span>
-          </div>
-          <div className="key" data-key="82">
-            <kbd>R</kbd>
-            <span className="morse_code">. _ .</span>
-          </div>
-          <div className="key" data-key="84">
-            <kbd>T</kbd>
-            <span className="morse_code">_</span>
-          </div>
-          <div className="key" data-key="89">
-            <kbd>Y</kbd>
-            <span className="morse_code">_ . _ _</span>
-          </div>
-          <div className="key" data-key="85">
-            <kbd>U</kbd>
-            <span className="morse_code">. . _</span>
-          </div>
-          <div className="key" data-key="73">
-            <kbd>I</kbd>
-            <span className="morse_code">. .</span>
-          </div>
-          <div className="key" data-key="79">
-            <kbd>O</kbd>
-            <span className="morse_code">_ _ _</span>
-          </div>
-          <div className="key" data-key="80">
-            <kbd>P</kbd>
-            <span className="morse_code">. _ _ .</span>
-          </div>
-        </div>
 
-        <div className="keys keys_middle">
-          <div className="key" data-key="65">
-            <kbd>A</kbd>
-            <span className="morse_code">. _</span>
+          <div className="keys keys_middle">
+            <div className="key" onClick={this.clickAnsQuestion} data-key="65">
+              <kbd>A</kbd>
+              <span className="morse_code">. _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="83">
+              <kbd>S</kbd>
+              <span className="morse_code">. . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="68">
+              <kbd>D</kbd>
+              <span className="morse_code">_ . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="70">
+              <kbd>F</kbd>
+              <span className="morse_code">. . _ .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="71">
+              <kbd>G</kbd>
+              <span className="morse_code">_ _ .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="72">
+              <kbd>H</kbd>
+              <span className="morse_code">. . . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="74">
+              <kbd>J</kbd>
+              <span className="morse_code">. _ _ _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="75">
+              <kbd>K</kbd>
+              <span className="morse_code">_ . _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="76">
+              <kbd>L</kbd>
+              <span className="morse_code">. _ . .</span>
+            </div>
           </div>
-          <div className="key" data-key="83">
-            <kbd>S</kbd>
-            <span className="morse_code">. . .</span>
-          </div>
-          <div className="key" data-key="68">
-            <kbd>D</kbd>
-            <span className="morse_code">_ . .</span>
-          </div>
-          <div className="key" data-key="70">
-            <kbd>F</kbd>
-            <span className="morse_code">. . _ .</span>
-          </div>
-          <div className="key" data-key="71">
-            <kbd>G</kbd>
-            <span className="morse_code">_ _ .</span>
-          </div>
-          <div className="key" data-key="72">
-            <kbd>H</kbd>
-            <span className="morse_code">. . . .</span>
-          </div>
-          <div className="key" data-key="74">
-            <kbd>J</kbd>
-            <span className="morse_code">. _ _ _</span>
-          </div>
-          <div className="key" data-key="75">
-            <kbd>K</kbd>
-            <span className="morse_code">_ . _</span>
-          </div>
-          <div className="key" data-key="76">
-            <kbd>L</kbd>
-            <span className="morse_code">. _ . .</span>
+          <div className="keys keys_bottom">
+            <div className="key" onClick={this.clickAnsQuestion} data-key="90">
+              <kbd>Z</kbd>
+              <span className="morse_code">_ _ . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="88">
+              <kbd>X</kbd>
+              <span className="morse_code">_ . . _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="67">
+              <kbd>C</kbd>
+              <span className="morse_code">_ . _ .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="86">
+              <kbd>V</kbd>
+              <span className="morse_code">. . . _</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="66">
+              <kbd>B</kbd>
+              <span className="morse_code">_ . . .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="78">
+              <kbd>N</kbd>
+              <span className="morse_code">_ .</span>
+            </div>
+            <div className="key" onClick={this.clickAnsQuestion} data-key="77">
+              <kbd>M</kbd>
+              <span className="morse_code">_ _</span>
+            </div>
           </div>
         </div>
-        <div className="keys keys_bottom">
-          <div className="key" data-key="90">
-            <kbd>Z</kbd>
-            <span className="morse_code">_ _ . .</span>
-          </div>
-          <div className="key" data-key="88">
-            <kbd>X</kbd>
-            <span className="morse_code">_ . . _</span>
-          </div>
-          <div className="key" data-key="67">
-            <kbd>C</kbd>
-            <span className="morse_code">_ . _ .</span>
-          </div>
-          <div className="key" data-key="86">
-            <kbd>V</kbd>
-            <span className="morse_code">. . . _</span>
-          </div>
-          <div className="key" data-key="66">
-            <kbd>B</kbd>
-            <span className="morse_code">_ . . .</span>
-          </div>
-          <div className="key" data-key="78">
-            <kbd>N</kbd>
-            <span className="morse_code">_ .</span>
-          </div>
-          <div className="key" data-key="77">
-            <kbd>M</kbd>
-            <span className="morse_code">_ _</span>
-          </div>
-        </div>
-      </div>
+      </React.Fragment>
     );
   }
 }

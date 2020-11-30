@@ -57,6 +57,7 @@ kbd {
 .level_keyboard .pressed kbd {
   display: block;
 }
+
 .level_keyboard {
   padding: 0;
   height: max-content;
@@ -139,3 +140,99 @@ kbd {
   text-align: center;
   margin: 20px 0;
 }
+
+.complete {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.76);
+  color: white;
+  font-size: 50px;
+}
+
+@media only screen and (max-width: 811px) {
+  .keys__container {
+    /* display: block; */
+  }
+  .key,
+  .level_keyboard .key {
+    font-size: 20px;
+    width: fit-content;
+    border: none;
+  }
+
+  .keys,
+  .level_keyboard .keys {
+    /* border: 1px solid red; */
+    border-bottom: 1px solid #d3d3d3;
+  }
+
+  .morse_code {
+    display: none;
+  }
+
+  .pressed,
+  .level_keyboard .pressed {
+    transform: scale(1) !important;
+  }
+
+  .pressed .morse_code,
+  .level_keyboard .pressed .morse_code {
+    display: block !important;
+    font-size: 20px !important;
+    font-weight: bold;
+  }
+
+  .level_keyboard .pressed kbd {
+    display: none;
+  }
+
+  .level_keyboard .pressed .morse_code {
+    color: black;
+  }
+}
+
+/* @media only screen and (max-width: 600px) {
+  
+  .key,
+  .level_keyboard .key {
+    font-size: 20px;
+    width: fit-content;
+    border: none;
+  }
+
+  .keys,
+  .level_keyboard .keys {
+    border-bottom: 1px solid #d3d3d3;
+  }
+
+  .morse_code {
+    display: none;
+  }
+
+  .pressed,
+  .level_keyboard .pressed {
+    transform: scale(1) !important;
+  }
+
+  .pressed .morse_code,
+  .level_keyboard .pressed .morse_code {
+    display: block !important;
+    font-size: 20px !important;
+    font-weight: bold;
+  }
+
+  .level_keyboard .pressed kbd {
+    display: none;
+  }
+
+  .level_keyboard .pressed .morse_code {
+    color: black;
+  }
+} */
