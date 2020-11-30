@@ -21,6 +21,26 @@ class keyboard extends Component {
     this.state = { letters: [], level: 0 };
   }
 
+  handleKeyPressMobile = (keyCode) => {
+    const key = document.querySelector(`.key[data-key="${keyCode}"]`);
+    if (!key) return;
+    if (!this.flag) {
+      this.flag = 1;
+      const key = document.querySelector(`.key[data-key="${keyCode}"]`);
+      if (!key) return;
+      const audio = document.querySelector(`audio[data-key="${keyCode}"]`);
+      if (!audio) return;
+      key.classList.add("pressed");
+      audio.play();
+      setTimeout(() => {
+        key.classList.remove("pressed");
+        audio.currentTime = 0;
+        audio.pause();
+        this.flag = 0;
+      }, 1000);
+    }
+  };
+
   startLearning = () => {
     let info = document.querySelector(".info");
     let infoele = `<div class="info_text">Identify the sounds and press the keys on your keyboard corresponding to the sound</div>
@@ -134,9 +154,7 @@ class keyboard extends Component {
     }
   };
 
-  clickAnsQuestion = (e) => {
-    if (!this.isLevel) return;
-    let keyCode = parseInt(e.currentTarget.getAttribute("data-key"));
+  handleQuestion = (keyCode) => {
     const key = document.querySelector(`.key[data-key="${keyCode}"]`);
     const audio = document.querySelector(`audio[data-key="${keyCode}"]`);
     if (!key || !audio) return;
@@ -180,49 +198,17 @@ class keyboard extends Component {
     }
   };
 
-  ansQuestion = (e) => {
-    let keyCode = e.keyCode;
-    const key = document.querySelector(`.key[data-key="${keyCode}"]`);
-    const audio = document.querySelector(`audio[data-key="${keyCode}"]`);
-    if (!key || !audio) return;
-    if (this.questionOn) {
-      this.questionOn = 0;
-      key.classList.add("pressed");
-      if (keyCode === this.currentKeyCode) {
-        key.classList.add("greenBtn");
-        this.currentCount++;
-        if (++this.questionare[this.currIndex].count === 5) {
-          this.questionare[this.currIndex].audio.remove();
-          key.style.opacity = ".3";
-          this.questionare.splice(this.currIndex, 1);
-        }
-      } else {
-        key.classList.add("redBtn");
-        this.questionare[this.currIndex].count = Math.max(0, this.questionare[this.currIndex].count - 1);
-        this.questionare.forEach((obj) => {
-          if (obj.keyCode === keyCode) obj.count = Math.max(0, obj.count - 1);
-        });
-        this.currentCount = Math.max(0, this.currentCount - 2);
-      }
-      let progress = (this.currentCount / this.totalCount) * 100;
-
-      this.props.setProgress(progress);
-
-      setTimeout(() => {
-        key.classList.remove("pressed");
-        key.classList.remove("greenBtn");
-        key.classList.remove("redBtn");
-      }, 400);
-
-      if (this.currentCount === this.totalCount) {
-        this.finishLevel();
-        return;
-      }
-
-      setTimeout(() => {
-        this.playQuestion();
-      }, 1000);
+  clickAnsQuestion = (e) => {
+    let keyCode = parseInt(e.currentTarget.getAttribute("data-key"));
+    if (this.isLevel) {
+      this.handleQuestion(keyCode);
+    } else {
+      this.handleKeyPressMobile(keyCode);
     }
+  };
+
+  ansQuestion = (e) => {
+    this.handleQuestion(e.keyCode);
   };
 
   componentDidMount() {
