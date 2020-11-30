@@ -44,7 +44,7 @@ class keyboard extends Component {
   startLearning = () => {
     let info = document.querySelector(".info");
     let infoele = `<div class="info_text">Identify the sounds and press the keys on your keyboard corresponding to the sound</div>
-    <div class="info_play"><button class="info_play_btn">Play Again <i class="fas fa-play"></i></button></div>`;
+    <div class="info_play"><button class="info_play_btn">Play Sound Again <i class="fas fa-play"></i></button></div>`;
     info.innerHTML = "";
     info.insertAdjacentHTML("beforeend", infoele);
     document.querySelector(".info_play_btn").addEventListener("click", this.playCurrentSound);
@@ -171,11 +171,18 @@ class keyboard extends Component {
         }
       } else {
         key.classList.add("redBtn");
-        this.questionare[this.currIndex].count = Math.max(0, this.questionare[this.currIndex].count - 1);
+        if (this.questionare[this.currIndex].count) {
+          this.questionare[this.currIndex].count--;
+          this.currentCount--;
+        }
         this.questionare.forEach((obj) => {
-          if (obj.keyCode === keyCode) obj.count = Math.max(0, obj.count - 1);
+          if (obj.keyCode === keyCode) {
+            if (obj.count) {
+              obj.count--;
+              this.currentCount--;
+            }
+          }
         });
-        this.currentCount = Math.max(0, this.currentCount - 2);
       }
       let progress = (this.currentCount / this.totalCount) * 100;
 
