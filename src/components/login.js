@@ -35,6 +35,7 @@ class login extends Component {
     pwdInp.value = "";
     emailInp.value = "";
     try {
+      console.log(data);
       let val = await fetch(this.url + "login", {
         method: "POST",
         body: JSON.stringify(data),
