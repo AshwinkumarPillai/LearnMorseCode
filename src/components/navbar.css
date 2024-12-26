@@ -24,13 +24,45 @@
 .nav_link {
   transition: 0.3s;
   box-sizing: border-box;
+  color: #3867d6;
 }
 
 .nav_link:hover {
-  color: darkgreen !important;
+  color: #0097e6 !important;
+  border-color: #0097e6;
 }
 
 .active_nav {
-  padding: 7px 10px;
-  background: #f1c40f;
+  padding: 10px 10px;
+  /* background: #f1c40f; */
+  border-bottom: 2px solid #c0392b;
+  color: #c0392b !important;
+  border-color: #c0392b !important;
+}
+
+/* --------- */
+
+.login_container {
+  display: flex;
+  align-items: center;
+}
+
+.nav_button {
+  /* background-color: #007bff;  */
+  border: 1px solid #3867d6 !important;
+  color: #3867d6;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  text-decoration: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.nav_button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+  color: white;
+  text-decoration: none;
 }

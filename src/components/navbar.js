@@ -25,7 +25,13 @@ class navbar extends Component {
     return (
       <div className="navbar">
         <span>
-          <NavLink exact activeClassName="active_nav" className="nav_link" style={{ textDecoration: "none", color: "#40407a" }} to="/">
+          <NavLink
+            exact
+            activeClassName="active_nav"
+            className="nav_link"
+            style={{ textDecoration: "none" }}
+            to="/"
+          >
             <i className="fas fa-home"></i> Home
           </NavLink>
         </span>
@@ -34,7 +40,7 @@ class navbar extends Component {
             exact
             activeClassName="active_nav"
             className="nav_link"
-            style={{ textDecoration: "none", color: "#40407a" }}
+            style={{ textDecoration: "none" }}
             to="/tutorials"
           >
             <i className="fas fa-user-graduate"></i> Tutorials
@@ -47,30 +53,18 @@ class navbar extends Component {
               let user = val.user;
               return !user ? (
                 <div className="login_container">
-                  <NavLink
-                    exact
-                    activeClassName="active_nav"
-                    className="nav_link"
-                    style={{ textDecoration: "none", color: "#2980b9" }}
-                    to="/login"
-                  >
+                  <NavLink exact activeClassName="active_nav_button" className="nav_button" to="/login">
                     Login
                   </NavLink>
                   &nbsp;|&nbsp;
-                  <NavLink
-                    exact
-                    activeClassName="active_nav"
-                    className="nav_link"
-                    style={{ textDecoration: "none", color: "#2980b9" }}
-                    to="/register"
-                  >
+                  <NavLink exact activeClassName="active_nav_button" className="nav_button" to="/register">
                     Sign Up
                   </NavLink>
                 </div>
               ) : (
-                <div className="nav_link" style={{ textDecoration: "none", color: "red" }} onClick={this.logout}>
+                <button className="nav_button" onClick={this.logout}>
                   Logout
-                </div>
+                </button>
               );
             }}
           </ProductConsumer>
